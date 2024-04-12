@@ -1,13 +1,13 @@
 import React, { createContext, useState, useRef, useEffect } from 'react';
 import { io } from 'socket.io-client';
-import Peer from 'simple-peer';
+import Peer from 'simple-peer'; // used to create WebRTC connections between peers for real-time communication.
 
-const SocketContext = createContext();
+const SocketContext = createContext(); // Socket.IO client instance  is created by calling io with the server URL
 
-// const socket = io('http://localhost:5000');
-const socket = io('https://warm-wildwood-81069.herokuapp.com');
+const socket = io('http://localhost:5000');
 
 const ContextProvider = ({ children }) => {
+  // children by props
   const [callAccepted, setCallAccepted] = useState(false);
   const [callEnded, setCallEnded] = useState(false);
   const [stream, setStream] = useState();
@@ -15,24 +15,25 @@ const ContextProvider = ({ children }) => {
   const [call, setCall] = useState({});
   const [me, setMe] = useState('');
 
-  const myVideo = useRef();
-  const userVideo = useRef();
-  const connectionRef = useRef();
+  const myVideo = useRef(); // create a mutable ref
+  const userVideo = useRef();// create references to the local user's video element
+  const connectionRef = useRef(); // webrtc connection
 
   useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }) // takes permission  from user for camera and audio // returns a promise
       .then((currentStream) => {
         setStream(currentStream);
 
-        myVideo.current.srcObject = currentStream;
+        myVideo.current.srcObject = currentStream; // populate our video frame on screen  after taking permission
       });
 
-    socket.on('me', (id) => setMe(id));
+    socket.on('me', (id) => setMe(id)); // listen for specific action
 
-    socket.on('callUser', ({ from, name: callerName, signal }) => {
+    socket.on('callUser', ({ from, name: callerName, signal }) => { // call
       setCall({ isReceivingCall: true, from, name: callerName, signal });
     });
-  }, []);
+  }, []); // empty dependency array - means that the effect does not depend on any values from the component scope
+  // should not be re-run on subsequent renders, only after the initial render.
 
   const answerCall = () => {
     setCallAccepted(true);
@@ -69,15 +70,15 @@ const ContextProvider = ({ children }) => {
       peer.signal(signal);
     });
 
-    connectionRef.current = peer;
+    connectionRef.current = peer; // storing peer instance
   };
 
   const leaveCall = () => {
     setCallEnded(true);
 
-    connectionRef.current.destroy();
+    connectionRef.current.destroy(); // destroy webrtc connection
 
-    window.location.reload();
+    window.location.reload(); // reloads the page and provide user new id
   };
 
   return (

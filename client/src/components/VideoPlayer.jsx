@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+// functional component ->renders the video streams of the local user and the remote user.
 const VideoPlayer = () => {
   const { name, callAccepted, myVideo, userVideo, callEnded, stream, call } = useContext(SocketContext);
   const classes = useStyles();
@@ -30,6 +31,7 @@ const VideoPlayer = () => {
   return (
     <Grid container className={classes.gridContainer}>
       {stream && (
+        // our own  video // video stream of local/current user
         <Paper className={classes.paper}>
           <Grid item xs={12} md={6}>
             <Typography variant="h5" gutterBottom>{name || 'Name'}</Typography>
@@ -37,7 +39,8 @@ const VideoPlayer = () => {
           </Grid>
         </Paper>
       )}
-      {callAccepted && !callEnded && (
+      {callAccepted && !callEnded && ( // only in that case
+        // other user's video // renders the video stream of the remote user (the user being called).
         <Paper className={classes.paper}>
           <Grid item xs={12} md={6}>
             <Typography variant="h5" gutterBottom>{call.name || 'Name'}</Typography>
